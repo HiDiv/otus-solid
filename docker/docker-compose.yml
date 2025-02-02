@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  php:
+    build:
+      context: ./dev/
+      dockerfile: Dockerfile
+    image: hidiv/php-dev:8.3.16-1
+    extra_hosts:
+      ## Чтобы зафиксировать адрес gateway, на котором может слушать phpstorm
+      - "host.docker.internal:host-gateway"
+    environment:
+      ## Фишка для phpstorm
+      ## Идем Settings > Languages & Frameworks > PHP и создаем server с именем otus
+      PHP_IDE_CONFIG: "serverName=otus"
+    volumes:
+      ## Первым монтируем основной каталог
+      - type: bind
+        source: ../
+        target: /var/www/html
+    restart: no
