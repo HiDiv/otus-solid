@@ -7,43 +7,38 @@ on:
 jobs:
   build:
     name: Build Project
-    runs-on: hidiv/php-dev:8.3.16-1
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up cache for Composer dependencies
-        uses: actions/cache@v3
+      - name: Setup PHP with PECL extension
+        uses: shivammathur/setup-php@v2
         with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+          php-version: '8.3'
+          extensions: xdebug
+          tools: composer, codeception
+          coverage: xdebug
+          ini-values: xdebug.mode="develop,coverage"
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
         run: composer install --no-progress --no-suggest --optimize-autoloader
 
-  test:
-    name: Run Tests
-    needs: build
-    runs-on: hidiv/php-dev:8.3.16-1
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Restore Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
       - name: Run tests with coverage
         run: |
-          vendor/bin/codecept run Unit --coverage --coverage-html --coverage-xml
+          vendor/bin/codecept run Unit --coverage --coverage-html --coverage-xml --phpunit-xml
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v3
