@@ -41,7 +41,7 @@ jobs:
           vendor/bin/codecept run Unit --coverage --coverage-html --coverage-xml --phpunit-xml
 
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: tests/_output/coverage/
