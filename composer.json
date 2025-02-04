@@ -1,0 +1,29 @@
+{
+    "name": "hidiv/otus-solid-homework",
+    "description": "Dmitry Ivanov OTUS SOLID Homework",
+    "type": "project",
+    "license": "GPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Unit\\": "tests/Unit/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Dmitry Ivanov",
+            "email": "hidiv@mail.ru"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require-dev": {
+        "codeception/codeception": "^5.1",
+        "codeception/module-phpbrowser": "*",
+        "codeception/module-asserts": "*",
+        "codeception/verify": "^3.2"
+    }
+}
