@@ -25,5 +25,8 @@
         "codeception/module-phpbrowser": "*",
         "codeception/module-asserts": "*",
         "codeception/verify": "^3.2"
-    }
+    },
+  "require": {
+    "ext-parallel": "*"
+  }
 }
