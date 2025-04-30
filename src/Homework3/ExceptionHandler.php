@@ -2,9 +2,10 @@
 
 namespace App\Homework3;
 
+use App\Homework7\ExceptionHandlerInterface;
 use Throwable;
 
-class ExceptionHandler
+class ExceptionHandler implements ExceptionHandlerInterface
 {
     private array $handlers = [];
 
