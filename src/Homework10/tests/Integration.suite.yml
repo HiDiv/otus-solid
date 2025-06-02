@@ -1,0 +1,16 @@
+actor: IntegrationTester
+suite_namespace: App\Tests\Integration
+modules:
+  # enable helpers as array
+  enabled:
+    - Symfony:
+        app_path: 'src'
+        var_path: 'var'
+        environment: 'test'
+        bootstrap: true
+    - Doctrine:
+        depends: Symfony
+        cleanup: true       # сбрасывать БД между тестами
+#       transaction: false  # либо true, если вы работаете только в одной транзакции
+    - Asserts
+#    - \Helper\Integration

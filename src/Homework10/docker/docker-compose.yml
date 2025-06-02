@@ -1,0 +1,87 @@
+services:
+  api-gateway:
+    image: traefik:v3.2.3
+    ports:
+      - "80:80"       # HTTP
+      - "9080:8080"
+    command:
+      # Общая конфигурация Traefik
+      - "--log.level=DEBUG"                                     # Логгирование (можно указать DEBUG)
+      - "--api.insecure=true"                                  # Админ-панель Traefik (уберите в продакшене)
+      - "--providers.docker=true"                              # Подключение к Docker
+      - "--providers.docker.exposedbydefault=false"            # Контейнеры не экпонируются по умолчанию
+      - "--entrypoints.http.address=:80"                       # Входная точка для HTTP
+      - "--serversTransport.insecureSkipVerify=true"
+    volumes:
+      # Доступ к Docker API
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+        read_only: true
+    #    labels:
+    #      # Настройка Dashboard роутера
+    #      - "traefik.enable=true"
+    #      - "traefik.http.routers.traefik-router.rule=PathPrefix(`/gateway/`)"
+    #      - "traefik.http.routers.traefik-router.entrypoints=http"
+    #      - "traefik.http.routers.traefik-router.service=api@internal"
+    restart: unless-stopped
+
+  auth-service:
+    build:
+      context: ./dev/
+      dockerfile: Dockerfile
+    image: hidiv/php-dev:8.3.16-homework-10
+    env_file: .env
+    extra_hosts:
+      ## Чтобы зафиксировать адрес gateway, на котором может слушать phpstorm
+      - "host.docker.internal:host-gateway"
+    environment:
+      ## Фишка для phpstorm
+      ## Идем Settings > Languages & Frameworks > PHP и создаем server с именем otus
+      PHP_IDE_CONFIG: "serverName=otus"
+    volumes:
+      ## Первым монтируем основной каталог
+      - type: bind
+        source: ../
+        target: /var/www/html
+    labels:
+      - "traefik.enable=true"
+      # Маршрут по префиксу /auth/
+      - "traefik.http.routers.auth-router.rule=PathPrefix(`/auth/`)"
+      - "traefik.http.routers.auth-router.entrypoints=http"
+      # StripPrefix: удаляем /auth перед проксированием
+      - "traefik.http.routers.auth-router.middlewares=auth-strip"
+      - "traefik.http.routers.auth-router.service=auth-service"
+      # Определяем сервисный порт Apache PHP
+      - "traefik.http.services.auth-service.loadbalancer.server.port=80"
+      # Описание middleware StripPrefix
+      - "traefik.http.middlewares.auth-strip.stripprefix.prefixes=/auth"
+      - "traefik.http.middlewares.auth-strip.stripprefix.forceslash=true"
+    restart: unless-stopped
+    depends_on:
+      - api-gateway
+      - auth-db
+
+  auth-db:
+    image: mariadb:10.11.10-ubi9
+    ports:
+      #      ## Порты наружу можно не пробрасывать, если нет потребности коннектиться напрямую к БД
+      - "3306:3306"
+    volumes:
+      - type: volume
+        source: auth-db-data
+        target: /var/lib/mysql
+    command: --max_allowed_packet=32505856 # Set max_allowed_packet to 256M (or any other value)
+    environment:
+      ## Пароль root
+      MARIADB_ROOT_PASSWORD: "${AUTH_DB_ROOT_PASSWORD}"
+      ## Схема БД
+      MARIADB_DATABASE: "${AUTH_DB_DATABASE}"
+      ## Логин для доступа
+      MARIADB_USER: "${AUTH_DB_USER}"
+      ## Пароль для доступа
+      MARIADB_PASSWORD: "${AUTH_DB_PASS}"
+    restart: unless-stopped
+
+volumes:
+  auth-db-data:
