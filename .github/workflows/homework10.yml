@@ -52,9 +52,7 @@ jobs:
       - name: Configure test environment
         run: |
           cp src/Homework10/.env.test src/Homework10/.env.test.local
-          echo 'AUTH_DATABASE_URL=mysql://test:test@mariadb:3306/test_db' >> src/Homework10/.env.test.local
-          pwd
-          ls -la
+          echo 'AUTH_DATABASE_URL="mysql://test:test@mariadb:3306/test_db"' >> src/Homework10/.env.test.local
           cat src/Homework10/.env.test.local
 
       # 3) Кэшируем composer-пакеты (для подпапки src/Homework10)
@@ -73,7 +71,11 @@ jobs:
       # 4) Устанавливаем зависимости именно для подпроекта
       - name: Install composer dependencies
         working-directory: src/Homework10
-        run: composer install --no-progress --no-suggest --optimize-autoloader
+        env:
+          APP_ENV: test
+        run: |
+          composer install --no-progress --no-suggest --optimize-autoloader
+          composer dump-env test
 
       # 6) Ждём, чтобы MariaDB была «здоровой»
       - name: Wait for MariaDB to be ready
