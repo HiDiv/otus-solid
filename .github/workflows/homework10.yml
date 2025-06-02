@@ -52,7 +52,7 @@ jobs:
       - name: Configure test environment
         run: |
           cp src/Homework10/.env.test src/Homework10/.env.test.local
-          echo 'AUTH_DATABASE_URL="mysql://test:test@mariadb:3306/test_db"' >> src/Homework10/.env.test.local
+          echo 'AUTH_DATABASE_URL="mysql://test:test@127.0.0.1:3306/test_db"' >> src/Homework10/.env.test.local
 
       # 3) Кэшируем composer-пакеты (для подпапки src/Homework10)
       - name: Get composer cache dir
