@@ -48,6 +48,11 @@ jobs:
           coverage: xdebug
           ini-values: xdebug.mode="develop,coverage"
 
+      # 5) Создаём .env.test.local
+      - name: Configure test environment
+        run: |
+          echo "DATABASE_URL=mysql://test:test@mariadb:3306/test_db" >> src/Homework10/.env.test.local
+
       # 3) Кэшируем composer-пакеты (для подпапки src/Homework10)
       - name: Get composer cache dir
         id: composer-cache
@@ -65,11 +70,6 @@ jobs:
       - name: Install composer dependencies
         working-directory: src/Homework10
         run: composer install --no-progress --no-suggest --optimize-autoloader
-
-      # 5) Создаём .env.test.local
-      - name: Configure test environment
-        run: |
-          echo "DATABASE_URL=mysql://test:test@mariadb:3306/test_db" >> src/Homework10/.env.test.local
 
       # 6) Ждём, чтобы MariaDB была «здоровой»
       - name: Wait for MariaDB to be ready
