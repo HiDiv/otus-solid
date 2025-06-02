@@ -53,7 +53,6 @@ jobs:
         run: |
           cp src/Homework10/.env.test src/Homework10/.env.test.local
           echo 'AUTH_DATABASE_URL="mysql://test:test@mariadb:3306/test_db"' >> src/Homework10/.env.test.local
-          cat src/Homework10/.env.test.local
 
       # 3) Кэшируем composer-пакеты (для подпапки src/Homework10)
       - name: Get composer cache dir
@@ -78,17 +77,19 @@ jobs:
           composer dump-env test
 
       # 6) Ждём, чтобы MariaDB была «здоровой»
-      - name: Wait for MariaDB to be ready
+      - name: Wait for MariaDB health status
         run: |
+          # Ждём пока контейнер mariadb не перейдёт в STATE "healthy"
           for i in $(seq 1 30); do
-            if mysqladmin ping -h mariadb -uroot -proot &>/dev/null; then
-              echo "MariaDB is up!"
+            STATUS=$(docker inspect --format='{{.State.Health.Status}}' $(docker ps -qf "ancestor=mariadb:10.11.10-ubi9"))
+            if [ "$STATUS" == "healthy" ]; then
+              echo "MariaDB is healthy!"
               exit 0
             fi
-            echo "Waiting for MariaDB..."
+            echo "Waiting for MariaDB health status... (current: $STATUS)"
             sleep 2
           done
-          echo "MariaDB did not start in time."
+          echo "MariaDB did not become healthy in time."
           exit 1
 
       # 7) Создаём схему и прогоняем миграции
