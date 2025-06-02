@@ -66,13 +66,10 @@ jobs:
         working-directory: src/Homework10
         run: composer install --no-progress --no-suggest --optimize-autoloader
 
-      # 5) Создаём .env.test.local (если есть .env.test, то дублируем и настраиваем DATABASE_URL)
+      # 5) Создаём .env.test.local
       - name: Configure test environment
         run: |
-      #    cp src/Homework10/.env.test src/Homework10/.env.test.local
-          echo "DATABASE_URL=\"mysql://test:test@mariadb:3306/test_db\"" >> src/Homework10/.env.test.local
-          # При необходимости можно дополнительно добавить:
-          # echo "APP_SECRET=some_test_secret" >> src/Homework10/.env.test.local
+          echo "DATABASE_URL=mysql://test:test@mariadb:3306/test_db" >> src/Homework10/.env.test.local
 
       # 6) Ждём, чтобы MariaDB была «здоровой»
       - name: Wait for MariaDB to be ready
@@ -113,7 +110,7 @@ jobs:
         env:
           APP_ENV: test
         run: |
-      #    vendor/bin/codecept build
+          vendor/bin/codecept build
           vendor/bin/codecept run --coverage --coverage-html --coverage-xml --phpunit-xml
 
       # 10) Сохраняем артефакт отчёта о покрытии
