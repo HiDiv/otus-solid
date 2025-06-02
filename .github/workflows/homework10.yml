@@ -3,11 +3,11 @@ name: CI – Homework10
 # Срабатывает только когда что-то изменилось внутри src/Homework10/**
 on:
   push:
-    paths:
-      - 'src/Homework10/**'
+#    paths:
+#      - 'src/Homework10/**'
   pull_request:
-    paths:
-      - 'src/Homework10/**'
+#    paths:
+#      - 'src/Homework10/**'
 
 jobs:
   test-homework10:
